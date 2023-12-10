@@ -1,0 +1,58 @@
+基于课件p9的demo，谁会触发异常
+A. 左侧demo
+B. 右侧demo
+C. 两个demo 都会
+
+$t1的值为0，执行以下指令div $t0,$t1会出现什么情况
+A. exception，除数为0
+B. 做完除法后继续往下执行
+
+基于课件p13的demo，做如下尝试：
+break 在 0x80000180 处
+A. 执行到break后停止程序执行
+B. 执行到break后又返回到exception-handler执行
+C. exception handler里不响应break（意味着这里的break失效）
+
+基于课件p13的demo，做如下尝试：
+break在eret的下面，是否会影响exception-handler的执行
+A. 影响
+B. 不影响
+
+exception handler 的入口地址是：
+A. 00400000 //.text
+B. 10010000 //.data local-lable , static 
+C. 90000000 //.kdata
+D. 80000180  //exception handler 的入口地址
+E. 80000000  //.ktext
+
+在mips源代码里定义了如下的exception handler
+当用户空间里执行div $t0,$t1 指令($t1为0)时会出现什么情况
+	.ktext 	0x80000180
+    move $k0,$v0
+	move $k1,$a0
+	la $a0,msg
+	li $v0,4
+	syscall
+	
+	move $v0,$k0  
+	move $a0,$k1
+	
+	mfc0 $k0,$14
+	addi $k0,$k0,4 
+	mtc0 $k0,$14
+	
+	eret
+	
+	A. 报错，除数为0
+	B. 打印输出msg字符串，继续执行div 的下一条指令  //div $v0,$t0,$t1
+	C. 执行div后继续执行下一条指令  //div $t0,$t1
+
+有哪些方法可以进入到exception handler做执行
+(该题关于3有一定的争议，了解具体在哪种场景下会因为eret进入到exception handler即可）
+1) break
+2) 出现了MIPS中已定义好的异常
+3) eret epc->pc : exception return (如果c0的$14在exception handler中未做更新) eret -> exception event -> excetption handler
+4) trap 类型指令
+5) syscall  //li $V0,4  $A0：32'B0
+
+A. 全部  B. 2,3,4  C 1,2,4,5  D 1,2,4
